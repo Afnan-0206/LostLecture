@@ -40,6 +40,12 @@ Students frequently struggle to locate lecture slides, PDFs, notes, assignments,
   - 📦 **Exam Survival Packs**: Curated, syllabus-aligned resource bundles for midterms and finals.
   - 🏆 **Contributor Leaderboard**: Department scholar rankings, contribution points, and Academic MVP badges.
   - 🎯 **Syllabus Unit (1-6) & Exam PYQ Tagging**: Granular filtering for previous year exam questions and course modules.
+  - ✨ **Interactive Hover Buttons**: Physics-based interactive hover buttons with expanding micro-dot animations and direction-aware slide indicators across all primary workflows.
+  - 🔍 **Universal Spotlight Command Palette (`Ctrl+K` / `Cmd+K`)**: Instant keyboard navigation jumping directly to any course code, semester subjects, PYQs, and actions.
+  - 👁️ **Instant Document Quick-Peek**: In-modal PDF and lecture slide previewing directly from the search grid without leaving the page.
+  - 📝 **Academic Citation Generator**: Instant APA, IEEE, and BibTeX formatted citation generation for semester project references and lab reports.
+  - 🔥 **Exam Readiness & Study Streak Planner**: Gamified curriculum alignment tracker with exam countdown shortcuts on the student dashboard.
+  - ⚡ **Batch Moderation Workflow**: Single-click bulk review and approval capabilities for departmental administrators.
 
 ---
 

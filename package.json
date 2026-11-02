@@ -1,0 +1,20 @@
+{
+  "name": "lostlecture-monorepo",
+  "version": "1.0.0",
+  "description": "lostLecture - Academic Resource Management Platform (MERN)",
+  "private": true,
+  "scripts": {
+    "client": "npm run dev --prefix client",
+    "server": "npm run dev --prefix server",
+    "test:server": "npm run test --prefix server",
+    "seed": "npm run seed --prefix server",
+    "build:client": "npm run build --prefix client",
+    "install:all": "npm install && npm install --prefix client && npm install --prefix server"
+  },
+  "keywords": [
+    "mern",
+    "academic-resources",
+    "education"
+  ]
+}
+

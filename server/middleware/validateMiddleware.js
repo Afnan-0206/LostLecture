@@ -13,8 +13,9 @@ export const validateRequest = (schema) => (req, res, next) => {
     if (parsed.params) req.params = parsed.params;
     next();
   } catch (error) {
-    if (error.errors) {
-      const formattedErrors = error.errors.map((err) => ({
+    const issues = error.issues || error.errors;
+    if (issues && Array.isArray(issues)) {
+      const formattedErrors = issues.map((err) => ({
         field: err.path.slice(1).join('.'),
         message: err.message,
       }));

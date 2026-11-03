@@ -4,26 +4,26 @@ export const registerSchema = z.object({
   body: z
     .object({
       name: z
-        .string({ required_error: 'Full name is required' })
+        .string({ error: 'Full name is required' })
         .trim()
         .min(2, 'Name must be at least 2 characters')
         .max(100, 'Name cannot exceed 100 characters'),
       email: z
-        .string({ required_error: 'Email is required' })
+        .string({ error: 'Email is required' })
         .trim()
         .email('Please provide a valid email address')
         .toLowerCase(),
       password: z
-        .string({ required_error: 'Password is required' })
+        .string({ error: 'Password is required' })
         .min(6, 'Password must be at least 6 characters long'),
       confirmPassword: z
-        .string({ required_error: 'Confirm password is required' }),
+        .string({ error: 'Confirm password is required' }),
       department: z
-        .string({ required_error: 'Department is required' })
+        .string({ error: 'Department is required' })
         .trim()
         .min(2, 'Department name must be at least 2 characters'),
       semester: z.coerce
-        .number({ required_error: 'Semester is required' })
+        .number({ error: 'Semester is required' })
         .min(1, 'Semester must be between 1 and 12')
         .max(12, 'Semester must be between 1 and 12'),
       studentId: z.string().trim().optional().default(''),
@@ -37,12 +37,12 @@ export const registerSchema = z.object({
 export const loginSchema = z.object({
   body: z.object({
     email: z
-      .string({ required_error: 'Email is required' })
+      .string({ error: 'Email is required' })
       .trim()
       .email('Please provide a valid email address')
       .toLowerCase(),
     password: z
-      .string({ required_error: 'Password is required' })
+      .string({ error: 'Password is required' })
       .min(1, 'Password is required'),
   }),
 });

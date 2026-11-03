@@ -3,21 +3,21 @@ import { z } from 'zod';
 export const createResourceSchema = z.object({
   body: z.object({
     title: z
-      .string({ required_error: 'Resource title is required' })
+      .string({ error: 'Resource title is required' })
       .trim()
       .min(3, 'Title must be at least 3 characters')
       .max(200, 'Title cannot exceed 200 characters'),
     description: z.string().trim().max(2000).optional().default(''),
     subject: z
-      .string({ required_error: 'Subject is required' })
+      .string({ error: 'Subject is required' })
       .regex(/^[0-9a-fA-F]{24}$/, 'Invalid Subject ID format'),
     semester: z.coerce
-      .number({ required_error: 'Semester is required' })
+      .number({ error: 'Semester is required' })
       .min(1, 'Semester must be between 1 and 12')
       .max(12, 'Semester must be between 1 and 12'),
     type: z.enum(
       ['PDF', 'PPT', 'DOC', 'DOCX', 'Notes', 'Assignment', 'Reference Link', 'Other'],
-      { required_error: 'Resource type is required' }
+      { error: 'Resource type is required' }
     ),
     tags: z
       .union([

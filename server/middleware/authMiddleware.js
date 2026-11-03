@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import ApiError from '../utils/ApiError.js';
 import asyncHandler from '../utils/asyncHandler.js';
+import { decryptCookieToken } from '../utils/cookieCrypto.js';
 
 export const protect = asyncHandler(async (req, res, next) => {
   let token;
@@ -10,7 +11,8 @@ export const protect = asyncHandler(async (req, res, next) => {
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
   } else if (req.cookies && req.cookies.lostlecture_token) {
-    token = req.cookies.lostlecture_token;
+    // Decrypt the encrypted cookie token (with fallback to legacy raw tokens)
+    token = decryptCookieToken(req.cookies.lostlecture_token);
   }
 
   if (!token) {
@@ -40,4 +42,3 @@ export const protect = asyncHandler(async (req, res, next) => {
     throw new ApiError(401, 'Invalid or expired authentication token. Please log in again.');
   }
 });
-

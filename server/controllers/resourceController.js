@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Resource from '../models/Resource.js';
 import Subject from '../models/Subject.js';
 import Bookmark from '../models/Bookmark.js';
@@ -5,6 +6,23 @@ import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import { processFileUpload } from '../middleware/uploadMiddleware.js';
+
+// Helper to escape user-provided strings before constructing regular expressions
+export const escapeRegex = (str) => {
+  if (typeof str !== 'string') return '';
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
+const ALLOWED_RESOURCE_TYPES = [
+  'PDF',
+  'PPT',
+  'DOC',
+  'DOCX',
+  'Notes',
+  'Assignment',
+  'Reference Link',
+  'Other',
+];
 
 // @desc    Get resources with search, filters & pagination
 // @route   GET /api/resources
@@ -33,65 +51,99 @@ export const getResources = asyncHandler(async (req, res) => {
     query.status = 'approved';
   }
 
-  if (subject) {
-    query.subject = subject;
+  // Validate subject ID to prevent operator injection
+  if (subject && typeof subject === 'string') {
+    const trimmedSubject = subject.trim();
+    if (mongoose.Types.ObjectId.isValid(trimmedSubject)) {
+      query.subject = new mongoose.Types.ObjectId(trimmedSubject);
+    } else {
+      query.subject = null; // Unmatchable invalid format
+    }
   }
 
-  if (semester) {
-    query.semester = Number(semester);
+  // Validate numeric semester strictly (reject strings like "2abc")
+  if (semester !== undefined && semester !== '') {
+    if (typeof semester === 'number' || (typeof semester === 'string' && /^\d+$/.test(semester.trim()))) {
+      const semNum = Number(semester);
+      if (semNum >= 1 && semNum <= 12) {
+        query.semester = semNum;
+      }
+    }
   }
 
-  if (unit) {
-    query.unit = Number(unit);
+  // Validate numeric unit strictly (reject strings like "2abc")
+  if (unit !== undefined && unit !== '') {
+    if (typeof unit === 'number' || (typeof unit === 'string' && /^\d+$/.test(unit.trim()))) {
+      const unitNum = Number(unit);
+      if (unitNum >= 1 && unitNum <= 10) {
+        query.unit = unitNum;
+      }
+    }
   }
 
-  if (isPYQ === 'true') {
+  // Strict boolean validation for isPYQ
+  if (isPYQ === 'true' || isPYQ === true) {
     query.isPYQ = true;
+  } else if (isPYQ === 'false' || isPYQ === false) {
+    query.isPYQ = false;
   }
 
-  if (type) {
-    query.type = type;
+  // Strict allowlist for resource type
+  if (type && typeof type === 'string' && ALLOWED_RESOURCE_TYPES.includes(type.trim())) {
+    query.type = type.trim();
   }
 
+  // Tag validation (ensuring tags are strings only, rejecting operator objects)
   if (tags) {
-    const tagArray = Array.isArray(tags) ? tags : tags.split(',').map((t) => t.trim());
-    query.tags = { $in: tagArray };
+    let rawTags = [];
+    if (typeof tags === 'string') {
+      rawTags = tags.split(',').map((t) => t.trim());
+    } else if (Array.isArray(tags)) {
+      rawTags = tags.filter((t) => typeof t === 'string').map((t) => t.trim());
+    }
+    const cleanTags = rawTags.filter((t) => typeof t === 'string' && t.length > 0);
+    if (cleanTags.length > 0) {
+      query.tags = { $in: cleanTags };
+    }
   }
 
-  // Search logic (case-insensitive against title, description, tags)
-  if (search && search.trim()) {
+  // Search logic with escaped regex to prevent ReDoS and regex operator injection
+  if (search && typeof search === 'string') {
     const s = search.trim();
+    if (s.length > 0) {
+      const escaped = escapeRegex(s);
+      const searchRegex = { $regex: escaped, $options: 'i' };
 
-    // Check if search matches any subject code or name
-    const matchingSubjects = await Subject.find({
-      $or: [
-        { code: { $regex: s, $options: 'i' } },
-        { name: { $regex: s, $options: 'i' } },
-      ],
-    }).select('_id');
+      // Check if search matches any subject code or name
+      const matchingSubjects = await Subject.find({
+        $or: [{ code: searchRegex }, { name: searchRegex }],
+      }).select('_id');
 
-    const subjectIds = matchingSubjects.map((sub) => sub._id);
+      const subjectIds = matchingSubjects.map((sub) => sub._id);
 
-    query.$or = [
-      { title: { $regex: s, $options: 'i' } },
-      { description: { $regex: s, $options: 'i' } },
-      { tags: { $regex: s, $options: 'i' } },
-      ...(subjectIds.length > 0 ? [{ subject: { $in: subjectIds } }] : []),
-    ];
+      query.$or = [
+        { title: searchRegex },
+        { description: searchRegex },
+        { tags: searchRegex },
+        ...(subjectIds.length > 0 ? [{ subject: { $in: subjectIds } }] : []),
+      ];
+    }
   }
 
-  // Sorting
+  // Sorting allowlist
   let sortOption = { createdAt: -1 };
-  if (sort === 'popular') {
-    sortOption = { views: -1, createdAt: -1 };
-  } else if (sort === 'upvotes') {
-    sortOption = { upvoteCount: -1, createdAt: -1 };
-  } else if (sort === 'oldest') {
-    sortOption = { createdAt: 1 };
+  if (typeof sort === 'string') {
+    if (sort === 'popular') {
+      sortOption = { views: -1, createdAt: -1 };
+    } else if (sort === 'upvotes') {
+      sortOption = { upvoteCount: -1, createdAt: -1 };
+    } else if (sort === 'oldest') {
+      sortOption = { createdAt: 1 };
+    }
   }
 
-  const pageNum = Math.max(1, parseInt(page, 10));
-  const limitNum = Math.max(1, Math.min(100, parseInt(limit, 10)));
+  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const limitNum = Math.max(1, Math.min(100, parseInt(limit, 10) || 9));
   const skip = (pageNum - 1) * limitNum;
 
   const [totalResources, resources] = await Promise.all([
@@ -148,7 +200,12 @@ export const getResources = asyncHandler(async (req, res) => {
 // @route   GET /api/resources/:id
 // @access  Public
 export const getResourceById = asyncHandler(async (req, res) => {
-  const resource = await Resource.findById(req.params.id)
+  const { id } = req.params;
+  if (!id || typeof id !== 'string' || !mongoose.Types.ObjectId.isValid(id.trim())) {
+    throw new ApiError(400, 'Invalid resource identifier format');
+  }
+
+  const resource = await Resource.findById(id.trim())
     .populate('subject', 'name code semester description')
     .populate('uploadedBy', 'name email department semester role');
 
@@ -182,8 +239,13 @@ export const getResourceById = asyncHandler(async (req, res) => {
 export const createResource = asyncHandler(async (req, res) => {
   const { title, description, subject, semester, unit, isPYQ, type, tags, resourceUrl } = req.body;
 
-  // Validate subject exists
-  const subjectDoc = await Subject.findById(subject);
+  // Validate subject ID is a valid string ObjectId to prevent operator injection
+  if (!subject || typeof subject !== 'string' || !mongoose.Types.ObjectId.isValid(subject.trim())) {
+    throw new ApiError(400, 'Invalid or missing Subject ID format.');
+  }
+
+  const cleanSubjectId = subject.trim();
+  const subjectDoc = await Subject.findById(cleanSubjectId);
   if (!subjectDoc) {
     throw new ApiError(404, 'Selected subject does not exist');
   }
@@ -204,26 +266,34 @@ export const createResource = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Please provide an external resource URL or upload a file.');
   }
 
-  // Parse tags
+  // Parse and sanitize tags
   let tagArray = [];
   if (tags) {
-    tagArray = Array.isArray(tags)
-      ? tags
-      : tags.split(',').map((t) => t.trim()).filter(Boolean);
+    if (typeof tags === 'string') {
+      tagArray = tags.split(',').map((t) => t.trim()).filter(Boolean);
+    } else if (Array.isArray(tags)) {
+      tagArray = tags.filter((t) => typeof t === 'string').map((t) => t.trim()).filter(Boolean);
+    }
   }
+
+  // Validate resource type against allowlist
+  const cleanType =
+    typeof type === 'string' && ALLOWED_RESOURCE_TYPES.includes(type.trim())
+      ? type.trim()
+      : 'Other';
 
   // Security Rule: Admins publish directly; students require moderation
   const isDirectPublish = req.user.role === 'admin';
   const status = isDirectPublish ? 'approved' : 'pending';
 
   const resource = await Resource.create({
-    title,
-    description: description || '',
-    subject,
-    semester: Number(semester),
+    title: typeof title === 'string' ? title.trim() : '',
+    description: typeof description === 'string' ? description.trim() : '',
+    subject: new mongoose.Types.ObjectId(cleanSubjectId),
+    semester: Number(semester) || 1,
     unit: unit ? Number(unit) : null,
     isPYQ: isPYQ === 'true' || isPYQ === true,
-    type,
+    type: cleanType,
     tags: tagArray,
     resourceUrl: finalUrl,
     filePublicId,
@@ -255,7 +325,12 @@ export const createResource = asyncHandler(async (req, res) => {
 // @route   PATCH /api/resources/:id
 // @access  Private (Owner or Admin)
 export const updateResource = asyncHandler(async (req, res) => {
-  const resource = await Resource.findById(req.params.id);
+  const { id } = req.params;
+  if (!id || typeof id !== 'string' || !mongoose.Types.ObjectId.isValid(id.trim())) {
+    throw new ApiError(400, 'Invalid resource identifier format');
+  }
+
+  const resource = await Resource.findById(id.trim());
   if (!resource) {
     throw new ApiError(404, 'Resource not found');
   }
@@ -281,25 +356,39 @@ export const updateResource = asyncHandler(async (req, res) => {
     status,
   } = req.body;
 
-  if (title) resource.title = title;
-  if (description !== undefined) resource.description = description;
-  if (subject) resource.subject = subject;
+  if (title && typeof title === 'string') resource.title = title.trim();
+  if (description !== undefined && typeof description === 'string') resource.description = description.trim();
+  if (subject) {
+    if (typeof subject !== 'string' || !mongoose.Types.ObjectId.isValid(subject.trim())) {
+      throw new ApiError(400, 'Invalid Subject ID format');
+    }
+    const cleanSubId = subject.trim();
+    const subjectExists = await Subject.findById(cleanSubId);
+    if (!subjectExists) {
+      throw new ApiError(404, 'Selected subject does not exist');
+    }
+    resource.subject = new mongoose.Types.ObjectId(cleanSubId);
+  }
   if (semester) resource.semester = Number(semester);
   if (unit !== undefined) resource.unit = unit ? Number(unit) : null;
   if (isPYQ !== undefined) resource.isPYQ = Boolean(isPYQ);
-  if (type) resource.type = type;
-  if (resourceUrl) resource.resourceUrl = resourceUrl;
+  if (type && typeof type === 'string' && ALLOWED_RESOURCE_TYPES.includes(type.trim())) {
+    resource.type = type.trim();
+  }
+  if (resourceUrl && typeof resourceUrl === 'string') resource.resourceUrl = resourceUrl.trim();
 
   if (tags) {
-    resource.tags = Array.isArray(tags)
-      ? tags
-      : tags.split(',').map((t) => t.trim()).filter(Boolean);
+    if (typeof tags === 'string') {
+      resource.tags = tags.split(',').map((t) => t.trim()).filter(Boolean);
+    } else if (Array.isArray(tags)) {
+      resource.tags = tags.filter((t) => typeof t === 'string').map((t) => t.trim()).filter(Boolean);
+    }
   }
 
   // Only admin can change status and verificationStatus
   if (isAdmin) {
-    if (status) resource.status = status;
-    if (verificationStatus) resource.verificationStatus = verificationStatus;
+    if (status && typeof status === 'string') resource.status = status;
+    if (verificationStatus && typeof verificationStatus === 'string') resource.verificationStatus = verificationStatus;
   }
 
   const updated = await resource.save();
@@ -314,7 +403,12 @@ export const updateResource = asyncHandler(async (req, res) => {
 // @route   DELETE /api/resources/:id
 // @access  Private (Owner or Admin)
 export const deleteResource = asyncHandler(async (req, res) => {
-  const resource = await Resource.findById(req.params.id);
+  const { id } = req.params;
+  if (!id || typeof id !== 'string' || !mongoose.Types.ObjectId.isValid(id.trim())) {
+    throw new ApiError(400, 'Invalid resource identifier format');
+  }
+
+  const resource = await Resource.findById(id.trim());
   if (!resource) {
     throw new ApiError(404, 'Resource not found');
   }
@@ -338,8 +432,13 @@ export const deleteResource = asyncHandler(async (req, res) => {
 // @route   POST /api/resources/:id/view
 // @access  Public
 export const incrementViewCount = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  if (!id || typeof id !== 'string' || !mongoose.Types.ObjectId.isValid(id.trim())) {
+    throw new ApiError(400, 'Invalid resource identifier format');
+  }
+
   const resource = await Resource.findByIdAndUpdate(
-    req.params.id,
+    id.trim(),
     { $inc: { views: 1 } },
     { new: true }
   ).select('views');
@@ -355,7 +454,12 @@ export const incrementViewCount = asyncHandler(async (req, res) => {
 // @route   POST /api/resources/:id/vote
 // @access  Private
 export const toggleUpvote = asyncHandler(async (req, res) => {
-  const resource = await Resource.findById(req.params.id);
+  const { id } = req.params;
+  if (!id || typeof id !== 'string' || !mongoose.Types.ObjectId.isValid(id.trim())) {
+    throw new ApiError(400, 'Invalid resource identifier format');
+  }
+
+  const resource = await Resource.findById(id.trim());
   if (!resource) {
     throw new ApiError(404, 'Resource not found');
   }

@@ -5,7 +5,7 @@ import ApiError from '../utils/ApiError.js';
 import cloudinary from '../config/cloudinary.js';
 
 // Ensure uploads folder exists
-const uploadDir = path.resolve('uploads');
+export const uploadDir = path.resolve('uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -21,7 +21,7 @@ const ALLOWED_MIME_TYPES = [
   'application/zip',
 ];
 
-const storage = multer.diskStorage({
+export const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir);
   },
@@ -57,8 +57,88 @@ export const upload = multer({
   },
 });
 
+/**
+ * Safely deletes a temporary uploaded file strictly contained within the controlled upload directory.
+ * - Prevents parent traversal (../), deep traversal, and sibling directory bypasses.
+ * - Avoids false positives from valid filenames that happen to start with '..'.
+ * - Verifies real paths to prevent symlink traversal to external locations.
+ * - If target is a symlink pointing inside uploads, unlinks the symlink itself rather than its target.
+ * - Never deletes directories or files outside the configured upload directory.
+ *
+ * @param {string} filePath - Path of the uploaded file to delete.
+ * @returns {boolean} - True if file or internal symlink was successfully deleted; false otherwise.
+ */
+export const safeDeleteUpload = (filePath) => {
+  if (!filePath || typeof filePath !== 'string') {
+    return false;
+  }
+
+  try {
+    const resolvedBase = path.resolve(uploadDir);
+    const resolvedTarget = path.resolve(filePath);
+
+    // Lexical containment validation using path.relative()
+    const relative = path.relative(resolvedBase, resolvedTarget);
+    if (!relative || path.isAbsolute(relative)) {
+      return false;
+    }
+
+    // Ensure path does not escape base directory via parent traversal segments ('..')
+    const segments = relative.split(/[/\\]/);
+    if (segments.includes('..')) {
+      console.warn(`[Security] Blocked file deletion outside allowed directory: ${filePath}`);
+      return false;
+    }
+
+    // Check if the target exists
+    if (!fs.existsSync(resolvedTarget)) {
+      return false;
+    }
+
+    // Inspect target without following symlinks first
+    const lstats = fs.lstatSync(resolvedTarget);
+    if (lstats.isDirectory()) {
+      console.warn(`[Security] Target is a directory, refusing deletion: ${filePath}`);
+      return false;
+    }
+
+    // Resolve canonical real paths to prevent symlink escapes
+    const realBase = fs.existsSync(resolvedBase) ? fs.realpathSync(resolvedBase) : resolvedBase;
+    const realTarget = fs.realpathSync(resolvedTarget);
+    const realRelative = path.relative(realBase, realTarget);
+
+    if (!realRelative || path.isAbsolute(realRelative)) {
+      return false;
+    }
+
+    const realSegments = realRelative.split(/[/\\]/);
+    if (realSegments.includes('..')) {
+      console.warn(`[Security] Blocked symlink traversal attempt: ${filePath}`);
+      return false;
+    }
+
+    // If target is a symlink pointing inside uploadDir, unlink the symlink itself (resolvedTarget)
+    // preserving the target file. If it is a regular file, unlinks the file.
+    fs.unlinkSync(resolvedTarget);
+    return true;
+  } catch (err) {
+    console.warn(`[File Cleanup Error]: ${err.message}`);
+    return false;
+  }
+};
+
+export const safeDeleteFile = safeDeleteUpload;
+
 // Helper to upload to Cloudinary or use local static URL fallback
 export const processFileUpload = async (file) => {
+  if (!file || !file.path) {
+    return {
+      url: null,
+      publicId: null,
+      fileName: null,
+    };
+  }
+
   const isCloudinaryConfigured =
     process.env.CLOUDINARY_CLOUD_NAME &&
     process.env.CLOUDINARY_API_KEY &&
@@ -71,8 +151,8 @@ export const processFileUpload = async (file) => {
         resource_type: 'auto',
         folder: 'lostlecture_academic_resources',
       });
-      // Delete temporary local file
-      fs.unlink(file.path, () => {});
+      // Safely delete temporary local file within allowed upload directory
+      safeDeleteUpload(file.path);
       return {
         url: result.secure_url,
         publicId: result.public_id,

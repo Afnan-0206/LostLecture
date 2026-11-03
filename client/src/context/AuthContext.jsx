@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import api from '../services/api';
+import api, { clearCsrfToken } from '../services/api';
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext(null);
@@ -76,6 +76,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await api.post('/auth/logout').catch(() => {});
     } finally {
+      clearCsrfToken();
       setUser(null);
       setToken(null);
       localStorage.removeItem('lostlecture_token');

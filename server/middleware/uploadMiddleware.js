@@ -77,9 +77,25 @@ export const safeDeleteUpload = (filePath) => {
     const resolvedBase = path.resolve(uploadDir);
     const resolvedTarget = path.resolve(filePath);
 
-    // Lexical containment validation using path.relative()
+    // 1. Explicit directory prefix containment barrier recognized by CodeQL (StartsWithDirSanitizer)
+    // Ensures resolvedTarget is strictly within uploadDir and prevents sibling directory bypass
+    const safeBase = resolvedBase.endsWith(path.sep) ? resolvedBase : `${resolvedBase}${path.sep}`;
+    if (!resolvedTarget.startsWith(safeBase)) {
+      console.warn(`[Security] Blocked file deletion outside allowed directory: ${filePath}`);
+      return false;
+    }
+
+    // 2. Lexical containment validation using path.relative()
     const relative = path.relative(resolvedBase, resolvedTarget);
-    if (!relative || path.isAbsolute(relative)) {
+    if (
+      !relative ||
+      path.isAbsolute(relative) ||
+      relative === '..' ||
+      relative.startsWith(`..${path.sep}`) ||
+      relative.startsWith('../') ||
+      relative.startsWith('..\\')
+    ) {
+      console.warn(`[Security] Blocked file deletion outside allowed directory: ${filePath}`);
       return false;
     }
 
@@ -90,24 +106,38 @@ export const safeDeleteUpload = (filePath) => {
       return false;
     }
 
-    // Check if the target exists
+    // 3. Check if target exists on disk
     if (!fs.existsSync(resolvedTarget)) {
       return false;
     }
 
-    // Inspect target without following symlinks first
+    // 4. Directory deletion protection (inspect target without following symlinks)
     const lstats = fs.lstatSync(resolvedTarget);
     if (lstats.isDirectory()) {
       console.warn(`[Security] Target is a directory, refusing deletion: ${filePath}`);
       return false;
     }
 
-    // Resolve canonical real paths to prevent symlink escapes
+    // 5. Canonical real-path resolution to prevent symlink escapes
     const realBase = fs.existsSync(resolvedBase) ? fs.realpathSync(resolvedBase) : resolvedBase;
+    const safeRealBase = realBase.endsWith(path.sep) ? realBase : `${realBase}${path.sep}`;
     const realTarget = fs.realpathSync(resolvedTarget);
-    const realRelative = path.relative(realBase, realTarget);
 
-    if (!realRelative || path.isAbsolute(realRelative)) {
+    if (!realTarget.startsWith(safeRealBase)) {
+      console.warn(`[Security] Blocked symlink traversal attempt: ${filePath}`);
+      return false;
+    }
+
+    const realRelative = path.relative(realBase, realTarget);
+    if (
+      !realRelative ||
+      path.isAbsolute(realRelative) ||
+      realRelative === '..' ||
+      realRelative.startsWith(`..${path.sep}`) ||
+      realRelative.startsWith('../') ||
+      realRelative.startsWith('..\\')
+    ) {
+      console.warn(`[Security] Blocked symlink traversal attempt: ${filePath}`);
       return false;
     }
 

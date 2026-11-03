@@ -59,6 +59,18 @@ async function runPathTraversalTests() {
   assert(traversalResult2 === false, 'Deep traversal (../../server.js) is rejected');
   assert(fs.existsSync(serverJsPath), 'Target file (server.js) remains untouched');
 
+  // 3B. Traversal targeting CodeQL-reported file (server/middleware/uploadMiddleware.js)
+  const uploadMiddlewarePath = path.resolve('middleware', 'uploadMiddleware.js');
+  assert(fs.existsSync(uploadMiddlewarePath), 'Setup: uploadMiddleware.js exists');
+  const codeqlTraversalAttempt = path.join('uploads', '..', 'middleware', 'uploadMiddleware.js');
+  const codeqlTraversalResult = safeDeleteUpload(codeqlTraversalAttempt);
+  assert(codeqlTraversalResult === false, 'Traversal attempt targeting uploadMiddleware.js is rejected');
+  assert(fs.existsSync(uploadMiddlewarePath), 'Target file (uploadMiddleware.js) remains untouched after traversal attempt');
+
+  const codeqlDirectAbsResult = safeDeleteUpload(uploadMiddlewarePath);
+  assert(codeqlDirectAbsResult === false, 'Direct absolute path targeting uploadMiddleware.js is rejected');
+  assert(fs.existsSync(uploadMiddlewarePath), 'Target file (uploadMiddleware.js) remains untouched after direct path attempt');
+
   // 4. Sibling-directory prefix bypass (e.g. uploads_sibling/secret.txt)
   const siblingDir = path.resolve('uploads_sibling_test');
   if (!fs.existsSync(siblingDir)) {

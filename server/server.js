@@ -93,19 +93,11 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('combined'));
 }
 
-// Request Parsers
-app.use(express.json({ limit: '16kb' }));
-app.use(express.urlencoded({ extended: true, limit: '16kb' }));
-app.use(cookieParser());
-app.use(csrfProtection);
-
-// Static Uploads Folder
-app.use('/uploads', express.static(path.resolve('uploads')));
-
-// Rate Limiting
-const limiter = rateLimit({
+// Global Application Rate Limiting across all endpoints (including /uploads and API routes)
+// Mitigates CodeQL Alert #9 (js/missing-rate-limiting, CWE-770 / CWE-400)
+export const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 300,
+  max: process.env.NODE_ENV === 'test' ? 10000 : 500,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -114,7 +106,45 @@ const limiter = rateLimit({
     errors: [],
   },
 });
-app.use('/api', limiter);
+app.use(globalLimiter);
+
+// Dedicated Strict Rate Limiter for Authentication endpoints (CWE-307 brute-force mitigation)
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: process.env.NODE_ENV === 'test' ? 1000 : 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Too many authentication attempts from this IP, please try again after 15 minutes.',
+    errors: [],
+  },
+});
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
+
+// Request Parsers
+app.use(express.json({ limit: '16kb' }));
+app.use(express.urlencoded({ extended: true, limit: '16kb' }));
+app.use(cookieParser());
+app.use(csrfProtection);
+
+// Static Uploads Folder (protected by globalLimiter upstream)
+app.use('/uploads', express.static(path.resolve('uploads')));
+
+// General API Route Limiter
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: process.env.NODE_ENV === 'test' ? 10000 : 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Too many requests from this IP, please try again after 15 minutes.',
+    errors: [],
+  },
+});
+app.use('/api', apiLimiter);
 
 // CSRF token endpoint
 app.get('/api/csrf-token', (req, res) => {

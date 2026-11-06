@@ -47,29 +47,29 @@ const Sidebar = ({ isOpen, onClose }) => {
   ];
 
   const linkClass = ({ isActive }) =>
-    `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
+    `flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition duration-150 ${
       isActive
-        ? 'bg-blue-600 text-white shadow-xs'
-        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+        ? 'bg-slate-900 text-white font-semibold shadow-2xs'
+        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
     }`;
 
   const sidebarContent = (
-    <div className="h-full flex flex-col justify-between py-5 px-4 bg-white border-r border-slate-200">
+    <div className="h-full flex flex-col justify-between py-5 px-3.5 bg-white border-r border-slate-200/80">
       <div className="space-y-6">
         {/* Mobile close button */}
         <div className="flex items-center justify-between lg:hidden mb-2">
-          <span className="font-bold text-slate-800">Navigation</span>
+          <span className="font-semibold text-slate-900 text-sm">Navigation</span>
           <button
             onClick={onClose}
             className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Student Navigation */}
         <div>
-          <p className="px-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
+          <p className="px-3 text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
             Academic Portal
           </p>
           <nav className="space-y-1">

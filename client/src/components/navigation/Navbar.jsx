@@ -40,29 +40,29 @@ const Navbar = ({ onToggleSidebar }) => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
+    <header className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-2xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Left section: Hamburger & Brand */}
           <div className="flex items-center gap-3">
             <button
               onClick={onToggleSidebar}
-              className="p-2 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 lg:hidden focus:outline-none"
+              className="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 lg:hidden focus:outline-none transition"
               aria-label="Toggle sidebar"
             >
               <Menu className="w-5 h-5" />
             </button>
 
             <Link to="/" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-xs group-hover:bg-blue-700 transition">
-                <BookOpen className="w-5 h-5" />
+              <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white shadow-xs group-hover:bg-blue-600 transition duration-150">
+                <BookOpen className="w-4 h-4" />
               </div>
               <div className="flex flex-col">
-                <span className="font-bold text-lg leading-tight tracking-tight text-slate-900 group-hover:text-blue-600 transition">
+                <span className="font-semibold text-base leading-tight tracking-tight text-slate-900 group-hover:text-blue-600 transition duration-150">
                   lostLecture
                 </span>
-                <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest hidden sm:block">
-                  Academic Hub
+                <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider hidden sm:block">
+                  Academic Platform
                 </span>
               </div>
             </Link>
@@ -71,7 +71,7 @@ const Navbar = ({ onToggleSidebar }) => {
           {/* Center/Search Quick Trigger */}
           <button
             onClick={() => setCommandPaletteOpen(true)}
-            className="hidden md:flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50/80 hover:bg-slate-100 hover:border-slate-300 text-slate-500 text-xs transition max-w-xs w-64 justify-between"
+            className="hidden md:flex items-center gap-2.5 px-3 py-1.5 rounded-lg border border-slate-200/80 bg-slate-50/70 hover:bg-slate-100 hover:border-slate-300 text-slate-500 text-xs transition duration-150 max-w-xs w-64 justify-between"
           >
             <div className="flex items-center gap-2">
               <Search className="w-3.5 h-3.5 text-slate-400" />

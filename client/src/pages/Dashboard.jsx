@@ -92,20 +92,20 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in">
-      {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-3xl p-6 sm:p-8 text-white shadow-sm relative overflow-hidden">
+      {/* Clean Academic Command Header */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 text-white shadow-xs relative overflow-hidden">
         <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/30 text-blue-200 text-xs font-semibold backdrop-blur-xs mb-3">
-            <Sparkles className="w-3.5 h-3.5 text-blue-300" />
-            <span>Welcome to lostLecture</span>
+          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700/80 text-slate-300 text-xs font-medium mb-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            <span>{user?.department || 'Academic Portal'}</span>
+            <span className="text-slate-500">•</span>
+            <span>Semester {user?.semester || '1'}</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">
-            Hello, {user?.name || 'Scholar'}!
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white mb-2">
+            Academic Resource Hub
           </h1>
-          <p className="text-blue-100 text-sm leading-relaxed mb-6">
-            Find lecture notes, question banks, lab manuals, and slides for{' '}
-            <span className="font-semibold text-white">{user?.department || 'your department'}</span>{' '}
-            • Semester {user?.semester || '1'}.
+          <p className="text-slate-400 text-sm leading-relaxed mb-6">
+            Access verified lecture notes, past exam question papers, lab manuals, and syllabus modules.
           </p>
 
           {/* Quick Search */}
@@ -116,65 +116,62 @@ const Dashboard = () => {
             />
           </div>
         </div>
-
-        {/* Decorative background glow */}
-        <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-blue-600/30 rounded-full blur-3xl pointer-events-none"></div>
       </div>
 
       {/* KPI Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-            <BookOpen className="w-6 h-6" />
+        <div className="bg-white border border-slate-200/80 rounded-xl p-5 shadow-xs flex items-center gap-4">
+          <div className="w-11 h-11 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center font-medium">
+            <BookOpen className="w-5 h-5 text-slate-700" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <p className="text-xs font-medium text-slate-500 tracking-wide">
               Available Resources
             </p>
-            <p className="text-2xl font-bold text-slate-900">{stats.totalResources}</p>
+            <p className="text-2xl font-semibold text-slate-900 tabular-nums">{stats.totalResources}</p>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-            <FolderKanban className="w-6 h-6" />
+        <div className="bg-white border border-slate-200/80 rounded-xl p-5 shadow-xs flex items-center gap-4">
+          <div className="w-11 h-11 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center font-medium">
+            <FolderKanban className="w-5 h-5 text-slate-700" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <p className="text-xs font-medium text-slate-500 tracking-wide">
               Department Subjects
             </p>
-            <p className="text-2xl font-bold text-slate-900">{stats.totalSubjects}</p>
+            <p className="text-2xl font-semibold text-slate-900 tabular-nums">{stats.totalSubjects}</p>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-            <Bookmark className="w-6 h-6" />
+        <div className="bg-white border border-slate-200/80 rounded-xl p-5 shadow-xs flex items-center gap-4">
+          <div className="w-11 h-11 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center font-medium">
+            <Bookmark className="w-5 h-5 text-slate-700" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <p className="text-xs font-medium text-slate-500 tracking-wide">
               Saved Bookmarks
             </p>
-            <p className="text-2xl font-bold text-slate-900">{stats.totalBookmarks}</p>
+            <p className="text-2xl font-semibold text-slate-900 tabular-nums">{stats.totalBookmarks}</p>
           </div>
         </div>
       </div>
 
-      {/* Exam Readiness & Revision Streak Bar */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 text-white rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm border border-indigo-900/40">
+      {/* Exam Readiness & Revision Strip */}
+      <div className="bg-white border border-slate-200/80 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
         <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md flex-shrink-0 animate-pulse">
-            <Flame className="w-6 h-6" />
+          <div className="w-10 h-10 rounded-lg bg-amber-50 border border-amber-200/60 text-amber-700 flex items-center justify-center flex-shrink-0">
+            <Flame className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold">Mid-Term & Final Exam Readiness</span>
-              <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-extrabold border border-amber-500/30">
-                ACTIVE
+              <span className="text-sm font-semibold text-slate-900">Exam Preparation & Revision</span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                Active Term
               </span>
             </div>
-            <p className="text-xs text-slate-300 mt-0.5">
-              Curriculum aligned for <span className="text-white font-semibold">{user?.department || 'Department'}</span> • Semester {user?.semester || 1}
+            <p className="text-xs text-slate-500 mt-0.5">
+              Syllabus-aligned past papers and midterm study packs for {user?.department || 'your department'}.
             </p>
           </div>
         </div>
@@ -182,15 +179,15 @@ const Dashboard = () => {
         <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end flex-wrap">
           <Link
             to="/resources?isPYQ=true"
-            className="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold backdrop-blur-xs border border-white/10 transition"
+            className="px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-medium transition"
           >
-            Review Past Papers
+            Past Papers
           </Link>
           <Link
             to="/collections"
-            className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-xs transition"
+            className="px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium shadow-xs transition"
           >
-            Exam Masterpacks
+            Study Packs
           </Link>
         </div>
       </div>
@@ -199,52 +196,52 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Link
           to="/collections"
-          className="group p-5 rounded-2xl bg-gradient-to-br from-indigo-50/70 to-blue-50/40 border border-indigo-100 hover:border-indigo-300 transition shadow-xs flex items-center justify-between"
+          className="group p-5 rounded-xl bg-white border border-slate-200/80 hover:border-slate-300 transition shadow-xs flex items-center justify-between"
         >
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+            <div className="w-10 h-10 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
               <Layers className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition">
+                <span className="text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition">
                   Exam Survival Packs
                 </span>
-                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700">
-                  Featured
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                  Curated
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                Curated syllabus-aligned bundles with all notes & PYQs
+                Structured notes, lecture summaries, and past questions
               </p>
             </div>
           </div>
-          <ArrowRight className="w-4 h-4 text-indigo-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition" />
+          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 group-hover:translate-x-0.5 transition" />
         </Link>
 
         <Link
           to="/leaderboard"
-          className="group p-5 rounded-2xl bg-gradient-to-br from-amber-50/60 to-yellow-50/30 border border-amber-100 hover:border-amber-300 transition shadow-xs flex items-center justify-between"
+          className="group p-5 rounded-xl bg-white border border-slate-200/80 hover:border-slate-300 transition shadow-xs flex items-center justify-between"
         >
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-xs">
+            <div className="w-10 h-10 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
               <Trophy className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-slate-900 group-hover:text-amber-600 transition">
+                <span className="text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition">
                   Contributor Leaderboard
                 </span>
-                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
-                  Top Scholars
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                  Recognition
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                Discover leading contributors and verified academic MVPs
+                Top student contributors and peer-reviewed material uploaders
               </p>
             </div>
           </div>
-          <ArrowRight className="w-4 h-4 text-amber-500 group-hover:text-amber-600 group-hover:translate-x-1 transition" />
+          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 group-hover:translate-x-0.5 transition" />
         </Link>
       </div>
 
@@ -252,12 +249,12 @@ const Dashboard = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <FolderKanban className="w-5 h-5 text-blue-600" />
-            <h2 className="text-lg font-bold text-slate-900">Department Subjects</h2>
+            <FolderKanban className="w-4 h-4 text-slate-700" />
+            <h2 className="text-base font-semibold text-slate-900 tracking-tight">Department Subjects</h2>
           </div>
           <Link
             to="/subjects"
-            className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+            className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 transition"
           >
             <span>View All Subjects</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -284,12 +281,12 @@ const Dashboard = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-blue-600" />
-            <h2 className="text-lg font-bold text-slate-900">Recently Added Resources</h2>
+            <Clock className="w-4 h-4 text-slate-700" />
+            <h2 className="text-base font-semibold text-slate-900 tracking-tight">Recently Added Resources</h2>
           </div>
           <Link
             to="/resources?sort=newest"
-            className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+            className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 transition"
           >
             <span>Explore All</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -319,12 +316,12 @@ const Dashboard = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-emerald-600" />
-              <h2 className="text-lg font-bold text-slate-900">Popular Among Students</h2>
+              <TrendingUp className="w-4 h-4 text-slate-700" />
+              <h2 className="text-base font-semibold text-slate-900 tracking-tight">Popular Among Students</h2>
             </div>
             <Link
               to="/resources?sort=popular"
-              className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+              className="text-xs font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1 transition"
             >
               <span>View Ranked</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -340,18 +337,18 @@ const Dashboard = () => {
       )}
 
       {/* Quick Contribution Callout */}
-      <div className="bg-slate-900 rounded-3xl p-6 sm:p-8 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xs">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-7 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xs">
         <div className="space-y-1 text-center sm:text-left">
-          <h3 className="text-lg font-bold">Have lecture slides or helpful revision notes?</h3>
-          <p className="text-xs text-slate-400 max-w-md">
-            Help your batchmates succeed by contributing academic resources to lostLecture.
+          <h3 className="text-base font-semibold tracking-tight text-white">Have lecture slides or revision notes?</h3>
+          <p className="text-xs text-slate-400 max-w-md leading-relaxed">
+            Support your peers by sharing verified notes, course syllabi, and study resources.
           </p>
         </div>
         <InteractiveHoverButton
           to="/upload"
           variant="primary"
           size="md"
-          text="Upload Academic Material"
+          text="Upload Material"
           icon={<Upload className="w-4 h-4" />}
         />
       </div>

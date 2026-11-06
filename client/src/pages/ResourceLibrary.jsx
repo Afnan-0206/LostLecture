@@ -99,15 +99,15 @@ const ResourceLibrary = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Academic Resource Library</h1>
+          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Academic Resource Library</h1>
           <p className="text-xs text-slate-500 mt-1">
             Search, discover, and access peer-reviewed lecture notes, presentations, and study guides
           </p>
         </div>
 
-        <div className="text-xs text-slate-500 font-medium bg-white px-3 py-1.5 rounded-lg border border-slate-200 self-start sm:self-auto">
-          Showing <span className="font-bold text-slate-800">{resources.length}</span> of{' '}
-          <span className="font-bold text-slate-800">{pagination.total}</span> resources
+        <div className="text-xs text-slate-500 font-normal bg-white px-3 py-1.5 rounded-lg border border-slate-200/80 self-start sm:self-auto tabular-nums shadow-2xs">
+          Showing <span className="font-semibold text-slate-900">{resources.length}</span> of{' '}
+          <span className="font-semibold text-slate-900">{pagination.total}</span> resources
         </div>
       </div>
 

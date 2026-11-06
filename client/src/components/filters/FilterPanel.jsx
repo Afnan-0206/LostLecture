@@ -28,11 +28,11 @@ const FilterPanel = ({
   ];
 
   return (
-    <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs mb-6">
+    <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs mb-6">
       <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-100">
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-blue-600" />
-          <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+          <Filter className="w-3.5 h-3.5 text-slate-500" />
+          <h4 className="text-xs font-semibold text-slate-800 tracking-wide">
             Filter & Refine
           </h4>
         </div>

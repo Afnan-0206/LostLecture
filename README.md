@@ -3,6 +3,20 @@
 > **Never lose track of a lecture again.**
 > A centralized, subject-wise academic resource management platform built with the MERN stack.
 
+[![Live App](https://img.shields.io/badge/Live%20App-lostlecture.pages.dev-blue?style=for-the-badge&logo=cloudflare)](https://lostlecture.pages.dev/)
+[![Backend Status](https://img.shields.io/badge/API%20Status-Operational-brightgreen?style=for-the-badge&logo=render)](https://lostlecture-2.onrender.com/api/health)
+
+🌐 **Live URL**: [https://lostlecture.pages.dev/](https://lostlecture.pages.dev/)
+
+---
+
+## 🌐 Live Deployment
+
+- **Frontend Application**: [https://lostlecture.pages.dev/](https://lostlecture.pages.dev/) (Hosted on **Cloudflare Pages**)
+- **Backend API**: [https://lostlecture-2.onrender.com](https://lostlecture-2.onrender.com) (Hosted on **Render**)
+- **Database**: Cloud MongoDB Atlas Cluster
+- **Health Check**: [https://lostlecture-2.onrender.com/api/health](https://lostlecture-2.onrender.com/api/health)
+
 ---
 
 ## 📚 Overview
@@ -51,12 +65,14 @@ Students frequently struggle to locate lecture slides, PDFs, notes, assignments,
 
 ## 🔑 Demo Access Accounts
 
+You can test these roles directly on the live platform at **[https://lostlecture.pages.dev/login](https://lostlecture.pages.dev/login)**:
+
 | Role | Email | Password |
 |---|---|---|
 | **Administrator** | `admin@lostlecture.edu` | `AdminPassword123!` |
 | **Student** | `student@lostlecture.edu` | `StudentPassword123!` |
 
-*(The login screen also features 1-click demo credential fill buttons for fast testing)*
+*(The login screen at [https://lostlecture.pages.dev/login](https://lostlecture.pages.dev/login) also features 1-click demo credential fill buttons for fast testing)*
 
 ---
 
@@ -142,4 +158,3 @@ cd server
 node tests/integration.test.js
 ```
 All 25 integration tests will execute against live endpoints and verify complete end-to-end functionality including authentication, moderation, search, voting, comments, AI assistant, and leaderboard rankings.
-# LostLecture
